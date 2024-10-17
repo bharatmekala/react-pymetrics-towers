@@ -1,13 +1,10 @@
-<p align="center">
-  <a href="https://photkosee.github.io/react-pymetrics-towers/">
-    <img width="300" src="./public/images/logo.png">
-  </a>
-</p>
+# <p align="center"><a href="https://photkosee.github.io/react-pymetrics-towers/"><img width="300" src="./public/images/logo.png"></a></p>
+
 <p align="center">
 A game to make the towers match the target formation. <a href="https://photkosee.github.io/react-pymetrics-towers/">Play now!</a>
 </p>
 
-### Table of Contents
+## Table of Contents
 
 1. [Inspiration](#inspiration)
 2. [What this does?](#what-this-does)
@@ -36,7 +33,7 @@ This project is one of the Pymetrics games which will present users with three t
 
 ## Author
 Phot Koseekrainiramon
-- [LinkedIn](https://www.linkedin.com/in/phot-kosee/)
+- [LinkedIn](https://www.linkedin.com/in/photkosee/)
 - [GitHub](https://github.com/photkosee)
 
 ## Deployment
