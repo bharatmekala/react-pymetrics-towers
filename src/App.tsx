@@ -23,6 +23,55 @@ const initialBlocks: Block[] = [
   { id: 4, color: "bg-rose-300" },
 ];
 
+// Utility function to calculate optimal moves for Towers of Hanoi
+const calculateOptimalMoves = (startState: Block[][], targetState: Block[][]): number => {
+  // For Towers of Hanoi, the optimal solution follows a specific pattern
+  // The minimum moves needed is 2^n - 1 where n is the number of disks
+  // However, since this is a pattern matching game, we need to calculate
+  // the minimum moves to transform start state to target state
+  
+  let totalMoves = 0;
+  
+  // Calculate moves needed for each tower
+  for (let towerIndex = 0; towerIndex < 3; towerIndex++) {
+    const startTower = startState[towerIndex] || [];
+    const targetTower = targetState[towerIndex] || [];
+    
+    // Find the minimum moves to transform start tower to target tower
+    const moves = calculateTowerMoves(startTower, targetTower);
+    totalMoves += moves;
+  }
+  
+  return totalMoves;
+};
+
+const calculateTowerMoves = (startTower: Block[], targetTower: Block[]): number => {
+  // If towers are identical, no moves needed
+  if (startTower.length === targetTower.length && 
+      startTower.every((block, index) => block.id === targetTower[index].id)) {
+    return 0;
+  }
+  
+  // Calculate moves based on differences
+  let moves = 0;
+  
+  // Count blocks that need to be moved out
+  moves += startTower.length;
+  
+  // Count blocks that need to be moved in
+  moves += targetTower.length;
+  
+  // Subtract overlapping blocks that are already in correct position
+  const minLength = Math.min(startTower.length, targetTower.length);
+  for (let i = 0; i < minLength; i++) {
+    if (startTower[i].id === targetTower[i].id) {
+      moves -= 2; // Don't need to move out and back in
+    }
+  }
+  
+  return Math.max(0, moves);
+};
+
 const Home: React.FC = () => {
   const isMounted = useRef(false);
   const [open, setOpen] = useState<boolean>(true);
@@ -32,6 +81,7 @@ const Home: React.FC = () => {
   const [time, setTime] = useState<number>(0);
   const [isCounting, setIsCounting] = useState<boolean>(false);
   const [countStep, setCountStep] = useState<number>(0);
+  const [optimalMoves, setOptimalMoves] = useState<number>(0);
   const [firstPattern, setFirstPattern] = useState<Block[]>([]);
   const [secondPattern, setSecondPattern] = useState<Block[]>([]);
   const [thirdPattern, setThirdPattern] = useState<Block[]>([]);
@@ -81,6 +131,23 @@ const Home: React.FC = () => {
       isMounted.current = true;
     }
   }, [time]);
+
+  // Calculate optimal moves whenever patterns or towers change
+  useEffect(() => {
+    const startState = [
+      firstTower,
+      secondTower,
+      thirdTower
+    ];
+    const targetState = [
+      firstPattern,
+      secondPattern,
+      thirdPattern
+    ];
+    
+    const optimal = calculateOptimalMoves(startState, targetState);
+    setOptimalMoves(optimal);
+  }, [firstTower, secondTower, thirdTower, firstPattern, secondPattern, thirdPattern]);
 
   const getTime = () => {
     const time = Date.now() - date;
@@ -203,6 +270,7 @@ const Home: React.FC = () => {
           reset={reset}
           time={time}
           steps={countStep}
+          optimalMoves={optimalMoves}
         />
         <div
           className="flex flex-col lg:flex-row justify-center items-center
@@ -304,6 +372,15 @@ const Home: React.FC = () => {
               >
                 <h2 className="font-semibold">Steps</h2>
                 <p>{countStep}</p>
+              </div>
+              <div
+                className="
+                rounded-md bg-slate-200 w-full h-[80px]
+                flex flex-col py-2 justify-around items-center
+                "
+              >
+                <h2 className="font-semibold text-xs">Optimal</h2>
+                <p className="text-sm">{optimalMoves}</p>
               </div>
             </div>
           </div>
