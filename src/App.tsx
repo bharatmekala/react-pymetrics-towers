@@ -25,51 +25,74 @@ const initialBlocks: Block[] = [
 
 // Utility function to calculate optimal moves for Towers of Hanoi
 const calculateOptimalMoves = (startState: Block[][], targetState: Block[][]): number => {
-  // For Towers of Hanoi, the optimal solution follows a specific pattern
-  // The minimum moves needed is 2^n - 1 where n is the number of disks
-  // However, since this is a pattern matching game, we need to calculate
-  // the minimum moves to transform start state to target state
-  
+  // Count the minimum moves needed to transform start state to target state
   let totalMoves = 0;
   
-  // Calculate moves needed for each tower
-  for (let towerIndex = 0; towerIndex < 3; towerIndex++) {
-    const startTower = startState[towerIndex] || [];
-    const targetTower = targetState[towerIndex] || [];
-    
-    // Find the minimum moves to transform start tower to target tower
-    const moves = calculateTowerMoves(startTower, targetTower);
-    totalMoves += moves;
-  }
+  // For each block in the target state, calculate moves needed
+  targetState.forEach((targetTower, targetTowerIndex) => {
+    targetTower.forEach((targetBlock, targetPosition) => {
+      // Find where this block currently is
+      let currentTowerIndex = -1;
+      let currentPosition = -1;
+      
+      startState.forEach((startTower, towerIndex) => {
+        startTower.forEach((block, position) => {
+          if (block.id === targetBlock.id) {
+            currentTowerIndex = towerIndex;
+            currentPosition = position;
+          }
+        });
+      });
+      
+      // If block is already in correct position, no moves needed
+      if (currentTowerIndex === targetTowerIndex && currentPosition === targetPosition) {
+        return;
+      }
+      
+      // Calculate moves needed for this block
+      const movesForBlock = calculateMovesForBlock(
+        startState, 
+        currentTowerIndex, 
+        currentPosition, 
+        targetTowerIndex, 
+        targetPosition
+      );
+      
+      totalMoves += movesForBlock;
+    });
+  });
   
   return totalMoves;
 };
 
-const calculateTowerMoves = (startTower: Block[], targetTower: Block[]): number => {
-  // If towers are identical, no moves needed
-  if (startTower.length === targetTower.length && 
-      startTower.every((block, index) => block.id === targetTower[index].id)) {
+const calculateMovesForBlock = (
+  state: Block[][],
+  fromTower: number,
+  fromPos: number,
+  toTower: number,
+  toPos: number
+): number => {
+  // If block is already in correct position
+  if (fromTower === toTower && fromPos === toPos) {
     return 0;
   }
   
-  // Calculate moves based on differences
   let moves = 0;
   
-  // Count blocks that need to be moved out
-  moves += startTower.length;
-  
-  // Count blocks that need to be moved in
-  moves += targetTower.length;
-  
-  // Subtract overlapping blocks that are already in correct position
-  const minLength = Math.min(startTower.length, targetTower.length);
-  for (let i = 0; i < minLength; i++) {
-    if (startTower[i].id === targetTower[i].id) {
-      moves -= 2; // Don't need to move out and back in
-    }
+  // If block is not at the top of its current tower, need to move blocks above it
+  if (fromPos < state[fromTower].length - 1) {
+    moves += (state[fromTower].length - fromPos - 1);
   }
   
-  return Math.max(0, moves);
+  // The actual move of this block
+  moves += 1;
+  
+  // If target position is not at the top, need to move blocks there
+  if (toPos < state[toTower].length) {
+    moves += (state[toTower].length - toPos);
+  }
+  
+  return moves;
 };
 
 const Home: React.FC = () => {
